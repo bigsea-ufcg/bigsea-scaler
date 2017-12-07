@@ -24,20 +24,26 @@ class SSH_Utils(object):
     def run_command(self, command, user, host, key):
         conn = self._get_ssh_connection(host, user, key)
         conn.exec_command(command)
+        conn.close()
 
     def run_and_get_result(self, command, user, host, key):
         conn = self._get_ssh_connection(host, user, key)
         stdout = conn.exec_command(command)[1]
-        return stdout.read()
+        result = stdout.read()
+        conn.close()
+        return result
 
     def run_command_tunnel(self, command, user, host, key):
         conn = self._get_ssh_connection_tunnel(host, "root", key)
         conn.exec_command(command)
+        conn.close()
 
     def run_and_get_result_tunnel(self, command, user, host, key):
         conn = self._get_ssh_connection_tunnel(host, "root", key)
         stdout = conn.exec_command(command)[1]
-        return stdout.read()
+        result = stdout.read()
+        conn.close()
+        return result
 
     def _get_ssh_connection(self, ip, username, keypair_path):
         keypair = paramiko.RSAKey.from_private_key_file(keypair_path)
