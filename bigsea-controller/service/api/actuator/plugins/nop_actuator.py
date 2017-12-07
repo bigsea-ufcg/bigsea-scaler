@@ -15,6 +15,7 @@
 
 from service.api.actuator.actuator import Actuator
 
+
 class Nop_Actuator(Actuator):
 
     def prepare_environment(self, vm_data):
@@ -24,4 +25,7 @@ class Nop_Actuator(Actuator):
         pass
 
     def get_allocated_resources(self, vm_id):
+        return 100
+
+    def get_allocated_resources_to_cluster(self, vms_ids):
         return 100

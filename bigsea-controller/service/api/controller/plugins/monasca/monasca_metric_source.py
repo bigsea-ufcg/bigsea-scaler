@@ -24,8 +24,9 @@ class Monasca_Metric_Source(Metric_Source):
         self.parameters = parameters
 
     def get_most_recent_value(self, metric_name, options):
-        dimensions = {"application_id":options["application_id"]}
+        dimensions = {"application_id": options["application_id"]}
         measurement = self.monasca.last_measurement(metric_name, dimensions)
-        timestamp = datetime.datetime.strptime(measurement[0], '%Y-%m-%dT%H:%M:%S.%fZ')
+        timestamp = datetime.datetime.strptime(
+            measurement[0], '%Y-%m-%dT%H:%M:%S.%fZ')
         value = measurement[1]
-        return timestamp,100*value
+        return timestamp, 100 * value

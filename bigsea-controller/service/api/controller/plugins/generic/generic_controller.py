@@ -24,11 +24,14 @@ from utils.logger import ScalingLog
 
 # This class dictates the pace of the scaling process. It controls when Generic_Alarm
 # is called to check application state and when is necessary to wait.
+
+
 class Generic_Controller(Controller):
 
     def __init__(self, application_id, parameters):
-        self.logger = ScalingLog("diff.controller.log", "controller.log", application_id)
-        
+        self.logger = ScalingLog(
+            "diff.controller.log", "controller.log", application_id)
+
         scaling_parameters = parameters["scaling_parameters"]
 
         self.application_id = application_id
@@ -45,38 +48,40 @@ class Generic_Controller(Controller):
         self.actuator_type = scaling_parameters["actuator"]
         # The metric source plugin name
         self.metric_source_type = scaling_parameters["metric_source"]
-        
+
         # We use a lock here to prevent race conditions when stopping the controller
         self.running = True
         self.running_lock = threading.RLock()
-        
+
         # Gets a new metric source plugin using the given name
-        metric_source = Metric_Source_Builder().get_metric_source(self.metric_source_type, parameters)
+        metric_source = Metric_Source_Builder().get_metric_source(
+            self.metric_source_type, parameters)
         # Gets a new actuator plugin using the given name
         actuator = Actuator_Builder().get_actuator(self.actuator_type, parameters)
         # The alarm here is responsible for deciding whether to scale up or down, or even do nothing
-        self.alarm = Generic_Alarm(actuator, metric_source, self.trigger_down, self.trigger_up, 
-                                 self.min_cap, self.max_cap, self.actuation_size, self.metric_rounding, 
-                                 application_id, self.instances)
-        
+        self.alarm = Generic_Alarm(actuator, metric_source, self.trigger_down, self.trigger_up,
+                                   self.min_cap, self.max_cap, self.actuation_size, self.metric_rounding,
+                                   application_id, self.instances)
+
     def start_application_scaling(self):
         run = True
-        
+
         while run:
-            self.logger.log("Monitoring application: %s" % (self.application_id))
+            self.logger.log("Monitoring application: %s" %
+                            (self.application_id))
 
             # Call the alarm to check the application
             self.alarm.check_application_state()
 
             # Wait some time
             time.sleep(float(self.check_interval))
-            
+
             with self.running_lock:
                 run = self.running
-            
+
     def stop_application_scaling(self):
         with self.running_lock:
             self.running = False
-            
+
     def status(self):
         return self.alarm.status()

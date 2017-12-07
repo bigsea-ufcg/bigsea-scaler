@@ -17,13 +17,14 @@ from api.v10 import app
 import ConfigParser
 import utils.logger as logging
 
+
 def main():
     config = ConfigParser.RawConfigParser()
     config.read("controller.cfg")
 
     host = config.get("flask", "host")
     port = config.getint("flask", "port")
-    
+
     enable_logging = config.get("logging", "enable")
     logging_level = config.get("logging", "level")
 
@@ -32,8 +33,9 @@ def main():
         logging.configure_logging(logging_level)
     else:
         logging.disable()
-    
-    app.run(host, port, debug = True)
+
+    app.run(host, port, debug=True)
+
 
 if __name__ == "__main__":
     main()

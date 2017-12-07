@@ -16,6 +16,8 @@
 from service.exceptions.kvm_exceptions import InstanceNotFoundException
 
 # TODO: documentation
+
+
 class Instance_Locator(object):
 
     def __init__(self, ssh_utils, compute_nodes, compute_nodes_key):
@@ -31,4 +33,6 @@ class Instance_Locator(object):
             if in_node == "0\n":
                 return compute_node
 
-        raise InstanceNotFoundException(vm_id, "It was not possible to find the instance: command %s, ssh return value %s" % (check_command, in_node)) 
+        raise InstanceNotFoundException(vm_id,
+                                        "It was not possible to find the instance: command %s, ssh return value %s" %
+                                        (check_command, in_node))

@@ -22,16 +22,16 @@ from utils.logger import Log, configure_logging
 
 
 # FIXME: This class does not work with the current scaler format.
-# It should be removed in the future. 
+# It should be removed in the future.
 class Basic_Controller(Controller):
 
     def __init__(self, metric_source, actuator, parameters):
         # Set up logging
         self.logger = Log("basic.controller.log", "controller.log")
         configure_logging()
-        
+
         scaling_parameters = parameters["scaling_parameters"]
-        
+
         check_interval = scaling_parameters["check_interval"]
         trigger_down = scaling_parameters["trigger_down"]
         trigger_up = scaling_parameters["trigger_up"]
@@ -41,18 +41,20 @@ class Basic_Controller(Controller):
         metric_rounding = scaling_parameters["metric_rounding"]
 
         # Start alarm
-        self.alarm = Basic_Alarm(actuator, metric_source, trigger_down, trigger_up, min_cap, max_cap, actuation_size, metric_rounding)
+        self.alarm = Basic_Alarm(actuator, metric_source, trigger_down,
+                                 trigger_up, min_cap, max_cap, actuation_size, metric_rounding)
 
         # Start up controller thread
         # Create lock to access application list
         self.applications_lock = threading.RLock()
         self.applications = {}
-        self.controller = _Basic_Controller_Thread(self.applications, self.applications_lock, self.alarm, check_interval)
+        self.controller = _Basic_Controller_Thread(
+            self.applications, self.applications_lock, self.alarm, check_interval)
         self.controller_thread = threading.Thread(target=self.controller.start)
         self.controller_thread.start()
 
     def start_application_scaling(self, app_id, parameters):
-        self.logger.log("Adding application id: %s" %  (app_id))
+        self.logger.log("Adding application id: %s" % (app_id))
         # Acquire lock and add application
         with self.applications_lock:
             self.applications[app_id] = parameters
@@ -60,7 +62,7 @@ class Basic_Controller(Controller):
     def stop_application_scaling(self, app_id):
         #  Acquire lock and remove application
         with self.applications_lock:
-            if self.applications.has_key(app_id):
+            if app_id in self.applications.keys():
                 self.logger.log("Removing application id: %s" % (app_id))
                 self.applications.pop(app_id)
             else:
@@ -68,7 +70,7 @@ class Basic_Controller(Controller):
 
     def stop_controller(self):
         self.controller.running = False
-        
+
     def status(self):
         return ""
 
@@ -91,7 +93,8 @@ class _Basic_Controller_Thread():
         while self.running:
             # acquire lock, check applications and wait
             with self.applications_lock:
-                self.logger.log("Monitoring applications: %s" % (str(self.applications.keys())))
+                self.logger.log("Monitoring applications: %s" %
+                                (str(self.applications.keys())))
 
                 applications_ids = self.applications.keys()
 
@@ -99,7 +102,9 @@ class _Basic_Controller_Thread():
                 for application_id in applications_ids:
                     instances = self.applications[application_id]["instances"]
 
-                    self.logger.log("Checking application:%s|instances:%s" % (application_id, instances))
-                    self.alarm.check_application_state(application_id, instances)
+                    self.logger.log("Checking application:%s|instances:%s" % (
+                        application_id, instances))
+                    self.alarm.check_application_state(
+                        application_id, instances)
 
             time.sleep(float(self.check_interval))

@@ -18,6 +18,7 @@ from datetime import datetime
 
 global_enabled = False
 
+
 class Log:
     def __init__(self, name, output_file_path):
         self.logger = logging.getLogger(name)
@@ -31,7 +32,8 @@ class Log:
     def log(self, text):
         if global_enabled:
             self.logger.info(text)
-            
+
+
 class ScalingLog:
     def __init__(self, name, output_file_path, application_id):
         self.application_id = application_id
@@ -41,19 +43,22 @@ class ScalingLog:
         timestamp = datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
         log_string = "%s|%s|%s" % (self.application_id, timestamp, text)
         self.logger.log(log_string)
-            
+
+
 def enable():
     global global_enabled
     global_enabled = True
-        
+
+
 def disable():
     global global_enabled
     global_enabled = False
 
+
 def configure_logging(logging_level="INFO"):
-    levels = {"CRITICAL":logging.CRITICAL, "DEBUG":logging.DEBUG, "ERROR":logging.ERROR, 
-              "FATAL":logging.FATAL, "INFO":logging.INFO, "NOTSET":logging.NOTSET,
-              "WARN":logging.WARN, "WARNING":logging.WARNING
+    levels = {"CRITICAL": logging.CRITICAL, "DEBUG": logging.DEBUG, "ERROR": logging.ERROR,
+              "FATAL": logging.FATAL, "INFO": logging.INFO, "NOTSET": logging.NOTSET,
+              "WARN": logging.WARN, "WARNING": logging.WARNING
               }
-    
+
     logging.basicConfig(level=levels[logging_level])

@@ -16,12 +16,13 @@
 
 import requests
 
+
 class Authorizer:
-    
+
     def _get_authorization_data(self, username, password):
         authorization_data = "user=%s&pwd=%s" % (username, password)
         return authorization_data
-    
+
     def get_authorization(self, authorizer_url, username, password):
         data = self._get_authorization_data(username, password)
         r = requests.post(authorizer_url, data=data)

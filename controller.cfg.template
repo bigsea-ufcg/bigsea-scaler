@@ -28,6 +28,14 @@ keypair_compute_nodes =
 tunnel_ports = 
 # The actuator service's port
 actuator_port = 5047
+# Frontend vm credentials
+access_ip =
+access_username =
+access_password =
+# Open Nebula Credentials
+one_url =
+one_username =
+one_password =
 # The max possible disk throughput (iops) that can be allocated to a virtual machine.
 iops_reference = 
 # The max possible disk throughput, in bytes/sec, that can be allocated to a virtual machine.

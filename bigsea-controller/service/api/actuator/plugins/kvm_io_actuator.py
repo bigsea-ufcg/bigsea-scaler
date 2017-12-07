@@ -18,8 +18,9 @@ from service.exceptions.kvm_exceptions import InstanceNotFoundException
 from service.exceptions.infra_exceptions import AuthorizationFailedException
 from utils.authorizer import Authorizer
 
+
 class KVM_IO_Actuator(Actuator):
-    
+
     def __init__(self, instance_locator, remote_kvm, authorization_data):
         self.instance_locator = instance_locator
         self.remote_kvm = remote_kvm
@@ -29,37 +30,45 @@ class KVM_IO_Actuator(Actuator):
     # TODO: validation
     # This method receives as argument a map {vm-id:cap}
     def adjust_resources(self, vm_data):
-        authorization = self.authorizer.get_authorization(self.authorization_data['authorization_url'],
-                                                 self.authorization_data['bigsea_username'],
-                                                 self.authorization_data['bigsea_password'])
+        print "here1"
         
+        authorization = self.authorizer.get_authorization(self.authorization_data['authorization_url'],
+                                                          self.authorization_data['bigsea_username'],
+                                                          self.authorization_data['bigsea_password'])
+
         if not authorization['success']:
             raise AuthorizationFailedException()
-        
+
+        print "here2"
+
         for instance in vm_data.keys():
+            print instance
             try:
                 # Access compute nodes to discover vms location
+                print "here3"
                 instance_location = self.instance_locator.locate(instance)
                 # Access a compute node and change cap
-                self.remote_kvm.change_vcpu_quota(instance_location, instance, int(vm_data[instance]))
-                self.remote_kvm.change_io_quota(instance_location, instance, int(vm_data[instance]))
+                self.remote_kvm.change_vcpu_quota(
+                    instance_location, instance, int(vm_data[instance]))
+                self.remote_kvm.change_io_quota(
+                    instance_location, instance, int(vm_data[instance]))
             except InstanceNotFoundException:
                 print "instance not found:%s" % (instance)
 
     # TODO: validation
     def get_allocated_resources(self, vm_id):
         authorization = self.authorizer.get_authorization(self.authorization_data['authorization_url'],
-                                                 self.authorization_data['bigsea_username'],
-                                                 self.authorization_data['bigsea_password'])
-        
+                                                          self.authorization_data['bigsea_username'],
+                                                          self.authorization_data['bigsea_password'])
+
         if not authorization['success']:
             raise AuthorizationFailedException()
-        
+
         # Access compute nodes to discover vm location
         host = self.instance_locator.locate(vm_id)
         # Access a compute node and get amount of allocated resources
         return self.remote_kvm.get_allocated_resources(host, vm_id)
-    
+
     # TODO: validation
     def get_allocated_resources_to_cluster(self, vms_ids):
         for vm_id in vms_ids:
@@ -67,5 +76,5 @@ class KVM_IO_Actuator(Actuator):
                 return self.get_allocated_resources(vm_id)
             except InstanceNotFoundException:
                 print "instance not found:%s" % (vm_id)
-                
+
         raise Exception("Could not get allocated resources")

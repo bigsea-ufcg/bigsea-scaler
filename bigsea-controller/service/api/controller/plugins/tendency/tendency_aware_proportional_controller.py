@@ -22,12 +22,14 @@ import time
 from service.api.controller.plugins.tendency.tendency_aware_proportional_alarm import Tendency_Aware_Proportional_Alarm
 from service.exceptions.monasca_exceptions import No_Metrics_Exception
 
+
 class Tendency_Aware_Proportional_Controller(Controller):
 
     def __init__(self, application_id, parameters):
-        self.logger = Log("tendency.proportional.controller.log", "controller.log")
+        self.logger = Log(
+            "tendency.proportional.controller.log", "controller.log")
         configure_logging()
-        
+
         scaling_parameters = parameters["scaling_parameters"]
 
         self.application_id = application_id
@@ -44,42 +46,46 @@ class Tendency_Aware_Proportional_Controller(Controller):
         self.actuator_type = scaling_parameters["actuator"]
         # The metric source plugin name
         self.metric_source_type = scaling_parameters["metric_source"]
-        
+
         # We use a lock here to prevent race conditions when stopping the controller
         self.running = True
         self.running_lock = threading.RLock()
-        
+
         # Gets a new metric source plugin using the given name
-        metric_source = Metric_Source_Builder().get_metric_source(self.metric_source_type, parameters)
+        metric_source = Metric_Source_Builder().get_metric_source(
+            self.metric_source_type, parameters)
         # Gets a new actuator plugin using the given name
         actuator = Actuator_Builder().get_actuator(self.actuator_type, parameters)
         # The alarm here is responsible for deciding whether to scale up or down, or even do nothing
-        self.alarm = Tendency_Aware_Proportional_Alarm(actuator, metric_source, self.trigger_down, self.trigger_up, 
-                                 self.min_cap, self.max_cap, self.actuation_size, self.metric_rounding)
-        
+        self.alarm = Tendency_Aware_Proportional_Alarm(actuator, metric_source, self.trigger_down,
+                                                       self.trigger_up, self.min_cap, self.max_cap,
+                                                       self.actuation_size, self.metric_rounding)
+
     def start_application_scaling(self):
         run = True
-        #FIXME: add exception handling
+        # FIXME: add exception handling
         while run:
-            self.logger.log("Monitoring application: %s" % (self.application_id))
+            self.logger.log("Monitoring application: %s" %
+                            (self.application_id))
 
             # Call the alarm to check the application
             try:
-                self.alarm.check_application_state(self.application_id, self.instances)
-            except No_Metrics_Exception: 
+                self.alarm.check_application_state(
+                    self.application_id, self.instances)
+            except No_Metrics_Exception:
                 self.logger.log("No metrics available")
             except Exception as e:
                 self.logger.log(str(e))
 
             # Wait some time
             time.sleep(float(self.check_interval))
-            
+
             with self.running_lock:
                 run = self.running
-            
+
     def stop_application_scaling(self):
         with self.running_lock:
             self.running = False
-            
+
     def status(self):
         return self.alarm.status()

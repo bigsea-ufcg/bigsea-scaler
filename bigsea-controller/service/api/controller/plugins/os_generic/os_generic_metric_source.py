@@ -19,6 +19,7 @@ import paramiko
 import time
 import datetime
 
+
 class OS_Generic_Metric_Source(Metric_Source):
 
     def __init__(self, parameters):
@@ -28,10 +29,10 @@ class OS_Generic_Metric_Source(Metric_Source):
         self.start_time = parameters['start_time']
         self.expected_time = parameters['expected_time']
         self.host_username = 'ubuntu'
-        self.last_checked = ''        
+        self.last_checked = ''
         self.logger = Log("metrics.log", "metrics.log")
         configure_logging()
-    
+
     def _get_metric_value_from_log_line(self, log):
         value = None
         for i in range(len(log) - 1, 0, -1):
@@ -51,7 +52,8 @@ class OS_Generic_Metric_Source(Metric_Source):
         keypair = paramiko.RSAKey.from_private_key_file(self.keypair_path)
         conn = paramiko.SSHClient()
         conn.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        conn.connect(hostname=self.host_ip, username=self.host_username, pkey=keypair)
+        conn.connect(hostname=self.host_ip,
+                     username=self.host_username, pkey=keypair)
         return conn
 
     # This is an auxiliary function to prepare and publish the metric. The point is to keep
@@ -63,8 +65,8 @@ class OS_Generic_Metric_Source(Metric_Source):
             ref_value = self._get_elapsed_time() / self.expected_time
             measurement_value = self._get_metric_value_from_log_line(last_log)
             error = measurement_value - ref_value
-            self.logger.log("ref-value:%f|measurement-value:%f|error:%f" % (ref_value, 
-                                                                measurement_value, error))
+            self.logger.log("ref-value:%f|measurement-value:%f|error:%f" % (ref_value,
+                                                                            measurement_value, error))
             return error
         # Flag that checks if the log capture is ended
         elif '[END]' in last_log:
@@ -74,9 +76,10 @@ class OS_Generic_Metric_Source(Metric_Source):
         try:
             # First of all, a connection with the host is created.
             conn = self._get_ssh_connection()
-            # The second step consists in execute the command to capture the last log line from 
+            # The second step consists in execute the command to capture the last log line from
             # the log file using the connection create below and saving the outputs.
-            stdin , stdout, stderr = conn.exec_command("sudo tail -1 %s" % self.log_path)
+            stdin, stdout, stderr = conn.exec_command(
+                "sudo tail -1 %s" % self.log_path)
             timestamp = datetime.datetime.fromtimestamp(time.time())
             return timestamp, self._extract_metric_from_log(stdout.read())
 
@@ -86,4 +89,3 @@ class OS_Generic_Metric_Source(Metric_Source):
 
     def get_most_recent_value(self, metric_name, options):
         return self._monitoring_application()
-        

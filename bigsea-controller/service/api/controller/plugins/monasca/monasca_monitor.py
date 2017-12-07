@@ -55,7 +55,7 @@ class Monasca_Monitor:
             else self.get_measurements(name, dimensions)[0]
 
     def last_measurement(self, name, dimensions):
-        measurements = self.get_measurements(name, dimensions) 
+        measurements = self.get_measurements(name, dimensions)
 
         if measurements is None:
             raise No_Metrics_Exception()

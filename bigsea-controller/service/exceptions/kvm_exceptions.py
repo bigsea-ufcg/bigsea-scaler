@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 class InstanceNotFoundException(Exception):
 
     def __init__(self, instance_id=None, message=None):
